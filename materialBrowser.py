@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
-class Manager():
+class BrowserManager():
      
     def __init__(self):
         self._appLayout = None
@@ -113,6 +113,6 @@ class PresetBrowser(QWidget):
 # the file has been imported as a module.
 if __name__ == "__main__":
     qapp = QApplication(sys.argv)
-    manager = Manager()
+    manager = BrowserManager()
     manager.setup()
     sys.exit(qapp.exec_())
