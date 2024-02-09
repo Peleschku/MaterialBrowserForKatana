@@ -1,81 +1,118 @@
 import sys
-import os
 
-from PyQt5.QtWidgets import *
-from PyQt5.QtCore import *
-from PyQt5.QtGui import (QFont,
-                         QFontDatabase)
+from PyQt5.QtWidgets import (
+    QApplication,
+    QFileDialog,
+    QFileSystemModel,
+    QGridLayout,
+    QLabel,
+    QLineEdit,
+    QPushButton,
+    QTreeView,
+    QWidget,
+)
+
+class Manager():
+     
+    def __init__(self):
+        self._appLayout = None
+        self._appWidget = None
+
+    def setup(self):
+        self._appLayout = QGridLayout()
+        self._appWidget = PresetBrowser(self._appLayout)
+        self._appWidget.setResolution(1080, 720)  
+        self._appWidget.setup()  
 
 
 class PresetBrowser(QWidget):
-    def __init__(self):
+
+    def __init__(self, layout):
         super().__init__()
-        self.layout = QGridLayout()
-        self.createWindow()
 
-    
-    def createWindow(self):
+        if layout is None:
+            raise ValueError("Layout was not created.")
 
-        appWidth = 600
-        appHeight = 800
+        self._appLayout = layout
+        self._appWidth = 600
+        self._appHeight = 800
+        self._currentDirPath = ''
+        self._directoryText = QLineEdit()
+        self._sysModel = QFileSystemModel()
+        self._treeView = QTreeView()
+        self._appTitle = "Preset Browser"
+        self._mainLabel = QLabel("Material Library Path")
+        self._searchBtn = QPushButton('Search')
+        self._findMaterialBtn = QPushButton('Find Material')
 
-        self.setGeometry(150, 250, appWidth, appHeight)
-        self.setWindowTitle('Preset Browser')
-        self.populateUI()
-        self.setLayout(self.layout)
-        self.show()
+    # Public
+    def setup(self):
+        # Adds widgets to parent layout and set up event callbacks.
+        # After setting the correct location in the file system model
+        # create the window
 
-    def populateUI(self):
-
-
-        # setting up search field
-        setDirectory = QLabel('Material library Path')
-        self.storeDirectory = QLineEdit()
-        self.search = QPushButton('Search')
-
-        self.search.clicked.connect(self.openBrowser)
-
-        self.layout.addWidget(setDirectory, 0, 0)
-        self.layout.addWidget(self.storeDirectory, 1, 0, 1, 5)
-        self.layout.addWidget(self.search, 1, 5, 1, 2)
-
-        # Tree view of folder location specified above
-        # TODO: figure out why the model isn't looking at the file path
-        # that is added to the QLineEdit after a folder is specified
-
-        self.dirPath = ''
-        self.model = QFileSystemModel()
-        self.model.setRootPath(self.dirPath)
-
-        self.tree = QTreeView()
-        self.tree.setModel(self.model)
-        self.tree.setRootIndex(self.model.index(self.dirPath))
-
-        self.layout.addWidget(self.tree, 2, 0, 4, 7)
-
-        self.createMaterial = QPushButton('Search')
-        self.createMaterial.clicked.connect(self.importMaterial)
-
-        self.layout.addWidget(self.createMaterial, 6, 0, 1, 7)
-                         
-
-        self.show()
-    
-    def openBrowser(self):
+        # Add widgets to layout
+        self.setLayout(self._appLayout)
+        self._appLayout.addWidget(self._mainLabel, 0, 0)
+        self._appLayout.addWidget(self._searchBtn, 1, 5, 1, 2)
+        self._appLayout.addWidget(self._findMaterialBtn, 6, 0, 1, 7)
+        self._appLayout.addWidget(self._treeView, 2, 0, 4, 7)
+        self._appLayout.addWidget(self._directoryText, 1, 0, 1, 5)
         
-        # opens a file browser. Only accepts folders as inputs
-        filePath = QFileDialog.getExistingDirectory(self, "Select Material Library")
+        # setup event callbacks
+        self._findMaterialBtn.clicked.connect(self.__importMaterialCallback)
+        self._searchBtn.clicked.connect(self.__openBrowserCallback)
 
-        # adds the selected folder to the QLineEdit
-        if filePath:
-            self.storeDirectory.insert(filePath)
-            self.populateUI()
-            self.dirPath = filePath
-    
-    def importMaterial(self):
-        print(self.dirPath)
+        self.__setTreeViewDirectory()
+        self.__createWindow()
+
+    def setResolution(self, width, heigth):
+        self._appWidth = width
+        self._appHeight = heigth
+
+    # Private
+    def __setTreeViewDirectory(self, newPath = None):
+        # Updates the QTreeView Widget with a new system model that has
+        # been set to a new path or the current path avaiable if one has
+        # not been provided
+
+        self._currentDirPath = newPath or self._currentDirPath
+        self._sysModel.setRootPath(self._currentDirPath)
+        self._treeView.setModel(self._sysModel)
+        self._treeView.setRootIndex(self._sysModel.index(self._currentDirPath))
+        self._directoryText.setText(self._sysModel.rootPath())
+
+    def __createWindow(self):
+        self.setGeometry(150, 250,  self._appWidth, self._appHeight)
+        self.setWindowTitle(self._appTitle)
+        self.show()
+
+    # Event Callbacks
+    def __openBrowserCallback(self):
+        # Callback to open dialog when _findMaterialBtn is clicked. If a directory
+        # is selected it will be use as the new file location for _treeView
+        
+        newPath = ''
+        inputPath = self._directoryText.text()
+
+        # Use what the user has typed in the box
+        if inputPath and inputPath != self._currentDirPath:
+            newPath = inputPath
+        else:
+            # Opens a file browser. Only accepts folders as inputs
+            newPath = QFileDialog.getExistingDirectory(self, "Select Material Library")
+
+        if newPath:
+            self.__setTreeViewDirectory(newPath)
+            
+    def __importMaterialCallback(self):
+        raise NotImplementedError()
 
 
-app = QApplication(sys.argv)
-myWindow = PresetBrowser()
-sys.exit(app.exec())
+# Will run automatically if this file is ran as a script but not if
+# the file has been imported as a module.
+if __name__ == "__main__":
+    qapp = QApplication(sys.argv)
+    manager = Manager()
+    manager.setup()
+    sys.exit(qapp.exec_())
