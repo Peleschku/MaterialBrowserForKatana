@@ -34,8 +34,8 @@ class PresetBrowser(QWidget):
             raise ValueError("Layout was not created.")
 
         self._appLayout = layout
-        self._appWidth = 600
-        self._appHeight = 800
+        self._appWidth = 250
+        self._appHeight = 400
         self._currentDirPath = ''
         self._directoryText = QLineEdit()
         self._sysModel = QFileSystemModel()
@@ -43,7 +43,7 @@ class PresetBrowser(QWidget):
         self._appTitle = "Preset Browser"
         self._mainLabel = QLabel("Material Library Path")
         self._searchBtn = QPushButton('Search')
-        self._findMaterialBtn = QPushButton('Find Material')
+        self._findMaterialBtn = QPushButton('Create Material')
 
     # Public
     def setup(self):
