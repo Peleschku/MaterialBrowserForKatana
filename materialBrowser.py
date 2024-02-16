@@ -1,4 +1,5 @@
 import sys
+import os
 
 from PyQt5.QtWidgets import (
     QApplication,
@@ -114,20 +115,21 @@ class PresetBrowser(QWidget):
         filePath = self._treeView.model().fileInfo(index)
         materialPath = filePath.absoluteFilePath()
         
+        # splits the file path up so we can get the file extension
+        fileName, fileExtension = os.path.splitext(materialPath)
 
-        lookfileSuffix = '.klf'
-
-        if materialPath.endswith(lookfileSuffix):
+        # takes the file extension from above and creates either
+        # a LookFileIn node (for Katana Look Files), or a UsdIn
+        # node (for USD materials.)
+        if fileExtension == '.klf':
             lookFileIn = NodegraphAPI.CreateNode('LookFileMaterialsIn', NodegraphAPI.GetRootNode())
             lookFileIn.getParameter('lookfile').setValue(materialPath, 1)
+        else:
+            if fileExtension == '.usd' or '.usda' or '.usdc' or '.usdz':
+                usdIn = NodegraphAPI.CreateNode('UsdIn', NodegraphAPI.GetRootNode())
+                usdIn.getParameter('fileName').setValue(materialPath, 1)
 
-        usdVarSuffix = ['.usd', '.usda', '.usdz', '.usdc']
 
-        '''
-        if materialPath.endswith(lookfileSuffix):
-            usdIn = NodegraphAPI.CreateNode('UsdIn', NodegraphAPI.GetRootNode())
-            usdIn.getParameter('fileName').setValue(materialPath, 1)
-        '''
 
 
 # launching from Katana
