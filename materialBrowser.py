@@ -92,21 +92,31 @@ class PresetBrowser(QWidget):
         # Callback to open dialog when _findMaterialBtn is clicked. If a directory
         # is selected it will be use as the new file location for _treeView
         
-        newPath = ''
+        self.newPath = ''
         inputPath = self._directoryText.text()
 
         # Use what the user has typed in the box
         if inputPath and inputPath != self._currentDirPath:
-            newPath = inputPath
+            self.newPath = inputPath
         else:
             # Opens a file browser. Only accepts folders as inputs
-            newPath = QFileDialog.getExistingDirectory(self, "Select Material Library")
+            self.newPath = QFileDialog.getExistingDirectory(self, "Select Material Library")
 
-        if newPath:
-            self.__setTreeViewDirectory(newPath)
+        if self.newPath:
+            self.__setTreeViewDirectory(self.newPath)
             
     def __importMaterialCallback(self):
-        raise NotImplementedError()
+        
+        fileName = ""
+
+        for ix in self._treeView.selectedIndexes():
+            # Grabs the filepath of the selected material
+            if ix.column() == 0:
+                text = ix.data()
+                fileName += text
+        
+        materialPath = f'{self.newPath}/{fileName}'
+        print(materialPath)
 
 
 # Will run automatically if this file is ran as a script but not if
