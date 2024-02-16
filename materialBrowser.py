@@ -12,6 +12,8 @@ from PyQt5.QtWidgets import (
     QWidget,
 )
 
+#from Katana import NodegraphAPI
+
 class BrowserManager():
      
     def __init__(self):
@@ -106,19 +108,27 @@ class PresetBrowser(QWidget):
             self.__setTreeViewDirectory(self.newPath)
             
     def __importMaterialCallback(self):
+
+        # Finds the file path of item selected in the tree view      
+        index = self._treeView.selectedIndexes()[0]
+        filePath = self._treeView.model().fileInfo(index)
+        materialPath = filePath.absoluteFilePath()
         
-        fileName = ""
 
-        for ix in self._treeView.selectedIndexes():
-            # Grabs the filepath of the selected material
-            if ix.column() == 0:
-                text = ix.data()
-                fileName += text
-        
-        materialPath = f'{self.newPath}/{fileName}'
-        print(materialPath)
+        lookfileSuffix = '.klf'
+
+        if materialPath.endswith(lookfileSuffix):
+            lookFileIn = NodegraphAPI.CreateNode('LookFileMaterialsIn', NodegraphAPI.GetRootNode())
+            lookFileIn.getParameter('lookfile').setValue(materialPath, 1)
 
 
+# launching from Katana
+manager = BrowserManager()
+manager.setup()
+
+
+'''
+# Launching from VSCode
 # Will run automatically if this file is ran as a script but not if
 # the file has been imported as a module.
 if __name__ == "__main__":
@@ -126,3 +136,4 @@ if __name__ == "__main__":
     manager = BrowserManager()
     manager.setup()
     sys.exit(qapp.exec_())
+'''
