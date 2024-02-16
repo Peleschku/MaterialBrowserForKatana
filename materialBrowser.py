@@ -121,6 +121,14 @@ class PresetBrowser(QWidget):
             lookFileIn = NodegraphAPI.CreateNode('LookFileMaterialsIn', NodegraphAPI.GetRootNode())
             lookFileIn.getParameter('lookfile').setValue(materialPath, 1)
 
+        usdVarSuffix = ['.usd', '.usda', '.usdz', '.usdc']
+
+        '''
+        if materialPath.endswith(lookfileSuffix):
+            usdIn = NodegraphAPI.CreateNode('UsdIn', NodegraphAPI.GetRootNode())
+            usdIn.getParameter('fileName').setValue(materialPath, 1)
+        '''
+
 
 # launching from Katana
 manager = BrowserManager()
